@@ -1,0 +1,99 @@
+import sympy as sp
+from scipy.constants import hbar as ħ
+sp.init_printing()
+
+# Definicja symboli i funkcji
+x = sp.Symbol('x', real=True)  # Pozycja
+k = sp.Symbol('k', real=True, positive=True)  # Wektor falowy
+a = sp.Symbol('a', real=True)  # Szerokość studni
+m = sp.Symbol('m', real=True, positive=True)  # Masa cząstki
+t = sp.Symbol('t', real=True, positive=True)  # Czas
+n = sp.Symbol('n', integer=True, nonzero=True)  # Numer poziomu energetycznego
+psi = sp.Function('psi')
+
+print("Rozwiązanie równania Schrödingera dla studni potencjału:")
+# Równanie Schrödingera dla studni potencjału
+eq = sp.Eq(psi(x).diff(x, x), -k**2 * psi(x))
+print(eq)
+
+# Rozwiązanie równania Schrödingera
+sol = sp.dsolve(eq, psi(x), ics={psi(0): 0})
+print("\nRozwiązanie równania Schrödingera:")
+print(sol)
+
+# Podstawienie wartości k dla danego n
+sol = sol.subs(k, n * sp.pi / a)
+print("\nRozwiązanie z podstawioną wartością k:")
+print(sol)
+
+# Ustalenie stałej C1 na podstawie warunku początkowego
+sol = sol.subs(sp.Symbol('C1'), sp.sqrt(2 / a))
+print("\nRozwiązanie z ustaloną stałą C1:")
+print(sol)
+
+# Obliczenie pędu
+print("\nObliczenie pędu:")
+P = sp.integrate(sol.rhs * (-ħ * sp.I) * sol.rhs.diff(x), (x, 0, a)).simplify()
+print("P =")
+print(P)
+
+# Obliczenie pędu na kwadrat
+print("\nObliczenie pędu na kwadrat:")
+Psqu = sp.integrate(sol.rhs * (sol.rhs).diff(x, x) * (-ħ**2), (x, 0, a)).simplify()
+print("P^2 =")
+print(Psqu)
+
+# Obliczenie wariancji pędu
+print("\nObliczenie wariancji pędu:")
+sigmaPsqu = Psqu - P**2
+print("σ_P^2 =")
+print(sigmaPsqu)
+
+# Obliczenie odchylenia standardowego pędu
+print("\nObliczenie odchylenia standardowego pędu:")
+sigmaP = sp.sqrt(sigmaPsqu).simplify()
+print("σ_P =")
+print(sigmaP)
+
+# Obliczenie położenia
+print("\nObliczenie położenia:")
+X = sp.integrate(sol.rhs * x * sol.rhs, (x, 0, a)).simplify()
+print("X =")
+print(X)
+
+# Obliczenie położenia na kwadrat
+print("\nObliczenie położenia na kwadrat:")
+Xsqu = sp.integrate(sol.rhs * x**2 * sol.rhs, (x, 0, a)).simplify()
+print("X^2 =")
+print(Xsqu)
+
+# Obliczenie wariancji położenia
+print("\nObliczenie wariancji położenia:")
+sigmaXsqu = Xsqu - X**2
+print("σ_X^2 =")
+print(sigmaXsqu)
+
+# Obliczenie odchylenia standardowego położenia
+print("\nObliczenie odchylenia standardowego położenia:")
+sigmaX = sp.sqrt(sigmaXsqu)
+print("σ_X =")
+print(sigmaX)
+
+# Sprawdzenie nierówności nieoznaczoności
+print("\nSprawdzenie nierówności nieoznaczoności:")
+uncertainty_relation = sigmaP * sigmaX
+print("σ_P * σ_X =")
+print(uncertainty_relation)
+
+# Dla minimalnego n (n = 1)
+print("\nDla minimalnego n (n = 1):")
+re = ħ * sp.sqrt(3 * sp.pi**2 - 18) / 6
+result = ħ / 2
+
+if re.evalf() >= result:
+    print('Warunek spełniony')
+
+# Wyświetlenie wyników
+print("\nWyniki:")
+print("re =", re.evalf())
+print("result =", result)
